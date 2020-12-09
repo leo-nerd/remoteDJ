@@ -8,6 +8,7 @@ WebMidi.enable(function(err) {
 		inputs = WebMidi.inputs;
 		outputs = WebMidi.outputs;
 		fromTraktor = WebMidi.getInputByName("Traktor Virtual Output");
+		fromMax1 = WebMidi.getInputByName("from Max 1");
 		toTraktor = WebMidi.getOutputByName("Traktor Virtual Input");
 	}
 
@@ -17,6 +18,14 @@ WebMidi.enable(function(err) {
 		});
 	} else {
 		console.log("Traktor not detected - make sure Traktor is open");
+	}
+
+	if (fromMax1) {
+		fromMax1.addListener('controlchange', "all" , function(e) {
+			console.log("received controlchange", e);
+		});
+	} else {
+		console.log("Max not detected - make sure Max is open");
 	}
 
 	WebMidi.addListener("connected", function(e) {
