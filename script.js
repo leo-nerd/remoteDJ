@@ -1,26 +1,38 @@
-navigator.requestMIDIAccess()
-    .then(onMIDISuccess, onMIDIFailure);
+var inputs, outputs;
+var fromTraktor, toTraktor;
+WebMidi.enable(function(err) {
+	if (err) {
+		console.log("WebMidi could not be enabled.", err);
+	} else {
+		console.log("WebMidi enabled");
+		inputs = WebMidi.inputs;
+		outputs = WebMidi.outputs;
+		fromTraktor = WebMidi.getInputByName("Traktor Virtual Output");
+		fromMax1 = WebMidi.getInputByName("from Max 1");
+		toTraktor = WebMidi.getOutputByName("Traktor Virtual Input");
+	}
 
-function onMIDISuccess(midiAccess) {
-    // console.log(midiAccess);
-    const inputs = midiAccess.inputs.values();
-    const outputs = midiAccess.outputs.values();
+	if (fromTraktor) {
+		fromTraktor.addListener('controlchange', "all" , function(e) {
+			console.log("received controlchange", e);
+		});
+	} else {
+		console.log("Traktor not detected - make sure Traktor is open");
+	}
 
-    for (var input of midiAccess.inputs.values()) {
-    	input.onmidimessage = (msg) => getMIDIMessage(msg);
-    	// input.onmidimessage = (msg) => {console.log(msg);};
-    }
+	if (fromMax1) {
+		fromMax1.addListener('controlchange', "all" , function(e) {
+			console.log("received controlchange", e);
+		});
+	} else {
+		console.log("Max not detected - make sure Max is open");
+	}
 
-    midiAccess.onstatechange = function(e) {
-    	console.log(e.port.name, e.port.state);
-    }
-}
+	WebMidi.addListener("connected", function(e) {
+		console.log(e.port.name, "connected");
+	});
 
-function getMIDIMessage(midiMessage) {
-	// console.log("hey");
-	console.log(midiMessage.data);
-}
-
-function onMIDIFailure() {
-    console.log('Could not access your MIDI devices.');
-}
+	WebMidi.addListener("disconnected", function(e) {
+		console.log(e.port.name, "disconnected");
+	});
+});

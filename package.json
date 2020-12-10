@@ -1,0 +1,23 @@
+{
+  "name": "remotedj",
+  "version": "1.0.0",
+  "description": "",
+  "main": "servers/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leo-nerd/remoteDJ.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leo-nerd/remoteDJ/issues"
+  },
+  "homepage": "https://github.com/leo-nerd/remoteDJ#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^3.0.4"
+  }
+}
