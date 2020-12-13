@@ -1,7 +1,6 @@
 var express = require('express');
 var http = require('http');
 var socket = require('socket.io');
-var path = require('path');
 
 // app.get('/', (req, res) => {
 // 	// res.send('Hey');
@@ -15,15 +14,28 @@ var port = process.env.PORT || 8080;
 
 app.use(express.static(__dirname));
 
+// FOR CHAT APP
+// io.on('connection', (socket) => {
+// 	console.log(socket.id + " connected");
+// 	socket.on('disconnect', () => {
+// 		console.log(socket.id + " disconnected");
+// 	});
+	
+// 	socket.on('msgfromclient', (msg) => {
+// 		socket.broadcast.emit('msgfromserver', msg);
+// 		// io.emit("msgfromserver", msg);
+// 	});
+// });
+
 io.on('connection', (socket) => {
 	console.log(socket.id + " connected");
 	socket.on('disconnect', () => {
 		console.log(socket.id + " disconnected");
 	});
 	
-	socket.on('msgfromclient', (msg) => {
-		// console.log("From: " + msg.from + ";\nMessage: " + msg.payload);
-		socket.broadcast.emit('msgfromserver', msg);
+	socket.on('ctrlfromclient', (msg) => {
+		// console.log(msg);
+		socket.broadcast.emit('ctrlfromserver', msg);
 		// io.emit("msgfromserver", msg);
 	});
 });
