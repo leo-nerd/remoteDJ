@@ -29,7 +29,7 @@ WebMidi.enable(function(err) {
     var selectedInput = WebMidi.getInputByName(inputName);
     if (selectedInput) {
       selectedInput.addListener("controlchange", "all", function(ctrl) {
-        socket.emit("ctrlfromclient", {input: inputName, payload: ctrl});
+        socket.emit("ctrlfromclient", {inputName: inputName, payload: ctrl});
         selectedOutput.sendControlChange(
           ctrl.controller.number,
           ctrl.value,
