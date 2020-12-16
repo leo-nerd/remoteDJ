@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+  </head>
+  <body>
+  	<ul id="messages"></ul>
+    <form action="">
+      <input id="name" placeholder="Your name" autocomplete="off" />
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+    <div id="istyping"></div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+    	$(function() {
+    		var socket = io();
+    		var name = $('#name').val();
+    		
+    		$('form').submit(function (e) {
+    			e.preventDefault(); //prevents page reloading
+    			socket.emit('msgfromclient', {from: name, payload: $("#m").val()});
+    			$('#messages').append($('<li>').text(name + ": " + $('#m').val()));
+    			$('#m').val(''); //resets the message to ''
+    			return false;
+    		});	
+    		
+    		socket.on('msgfromserver', function(msg) {
+    			$('#messages').append($('<li>').text(msg.from + ": " + msg.payload));
+    		});
+    		
+    		$('#name').on('input', function() {
+    			// console.log($(this));
+    			name = $(this).val();
+    		});
+    	});
+    </script>
+  </body>
+</html>
