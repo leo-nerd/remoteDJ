@@ -1,5 +1,14 @@
 var inputs, outputs;
 var socket = io();
+var clientNum;
+var CClookup;
+
+//get the lookup table from the server
+socket.on("cclookup", function(msg) {
+  clientNum = msg.clientNum;
+  CClookup = msg.lookup;
+  console.log("This client (#" + clientNum + ") received lookup table from server");
+})
 
 socket.on("ctrlfromserver", function(msg) {
   console.log(
@@ -28,14 +37,7 @@ WebMidi.enable(function(err) {
     var inputName = $("#input-selector :selected").text();
     var selectedInput = WebMidi.getInputByName(inputName);
     if (selectedInput) {
-      selectedInput.addListener("controlchange", "all", function(ctrl) {
-        socket.emit("ctrlfromclient", {inputName: inputName, payload: ctrl});
-        selectedOutput.sendControlChange(
-          ctrl.controller.number,
-          ctrl.value,
-          ctrl.channel
-        );
-      });
+      addInputListeners(selectedInput);
     } else {
       console.log("No input available");
     }
@@ -43,14 +45,8 @@ WebMidi.enable(function(err) {
     var outputName = $("#output-selector :selected").text();
     var selectedOutput = WebMidi.getOutputByName(outputName);
     if (selectedOutput) {
-      socket.on("ctrlfromserver", function(msg) {
-        selectedOutput.sendControlChange(
-          msg.payload.controller.number,
-          msg.payload.value,
-          msg.payload.channel
-        );
-        // console.log(msg.controller.number + "; " + msg.value);
-      });
+      routeServerToOutput(selectedOutput);
+      
     } else {
       console.log("No output available");
     }
@@ -81,19 +77,40 @@ WebMidi.enable(function(err) {
 
     // listen to changes on I/O
     $("#input-selector").on("change", function() {
+      selectedInput.removeListener();
+      inputName = $("#input-selector :selected").text();
+      selectedInput = WebMidi.getInputByName(inputName);
+      addInputListeners(selectedInput);
       console.log("changed input to " + $("#input-selector :selected").text());
-      selectedInput = WebMidi.getInputByName(
-        $("#input-selector :selected").text()
-      );
     });
     $("#output-selector").on("change", function() {
-      console.log(
-        "changed output to " + $("#output-selector :selected").text()
-      );
-      selectedOutput = WebMidi.getOutputByName(
-        $("#output-selector :selected").text()
-      );
+      socket.off("ctrlfromserver");
+      outputName = $("#output-selector :selected").text();
+      selectedOutput = WebMidi.getOutputByName(outputName);
+      routeServerToOutput(selectedOutput);
+      console.log("changed output to " + $("#output-selector :selected").text());
     });
+
+    function addInputListeners(input) {
+      input.addListener("controlchange", "all", function(ctrl) {
+        socket.emit("ctrlfromclient", {inputName: inputName, payload: ctrl});
+        // selectedOutput.sendControlChange(
+        //   ctrl.controller.number,
+        //   ctrl.value,
+        //   ctrl.channel
+        // );
+      });
+    }
+
+    function routeServerToOutput(output) {
+      socket.on("ctrlfromserver", function(msg) {
+        output.sendControlChange(
+          msg.payload.controller.number,
+          msg.payload.value,
+          msg.payload.channel
+        );
+      });
+    }
 
     function refreshLists() {
       $("#input-selector")
